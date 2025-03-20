@@ -8,7 +8,7 @@ local conf = require('telescope.config').values
 
 local M = {}
 local config = {
-  digraphs = {}
+  digraphs = require('digraphs')
 }
 
 -- Custom column layout for Telescope display
@@ -31,7 +31,7 @@ end
 
 -- Setup function to configure plugin
 function M.setup(opts)
-  config.digraphs = opts.digraphs or {}
+  -- config.digraphs = opts.digraphs or {}
 end
 
 -- Main entry point for Telescope picker
