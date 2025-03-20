@@ -35,9 +35,10 @@ function M.setup(opts)
 end
 
 -- Main entry point for Telescope picker
-function M.insert_digraph()
+function M.insert_digraph(opts)
+  opts = opts or {}
   pickers.new({}, {
-    prompt_title = 'Insert Digraph',
+    prompt_title = "Insert Digraph",
     finder = finders.new_table({
       results = config.digraphs,
       entry_maker = function(entry)
