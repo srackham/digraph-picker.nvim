@@ -47,13 +47,17 @@ function M.merge_digraphs(src, dst)
   return dst
 end
 
+-- `validate_digraphs(digraph)` validates the `digraph` table of digraph definitions (see `merge_digraphs`) and returns `true` if there are no validation errors. When an invalid digraph definition is found the user is notified with a printed error message. The validation rules are as follows:
+--
+-- - the `symbol` field must be a single character.
+-- - the `digraph` field must be two printable characters.
+-- - the `name` field must contain at least one character.
 function M.validate_digraphs(digraph)
   if type(digraph) ~= "table" then
     error("Input must be a table of digraph definitions.")
   end
 
   local valid = true
-
   local function table_to_string(t)
     local parts = {}
     for k, v in pairs(t) do
@@ -66,34 +70,35 @@ function M.validate_digraphs(digraph)
     return "{ " .. table.concat(parts, ", ") .. " }"
   end
 
-  for i, def in ipairs(digraph) do
-    if type(def) ~= "table" then
-      print("Error: Digraph definition at index " .. i .. " is not a table.")
-      valid = false
-    else
-      if type(def.symbol) ~= "string" or vim.fn.strchars(def.symbol) ~= 1 then
-        print("Error: Invalid symbol in digraph definition at index " .. i .. ":")
-        print(table_to_string(def))
-        print("Symbol must be a single character.")
-        valid = false
-      end
-
-      if type(def.digraph) ~= "string" or vim.fn.strchars(def.digraph) ~= 2 or not def.digraph:match("^%C%C$") then
-        print("Error: Invalid digraph in digraph definition at index " .. i .. ":")
-        print(table_to_string(def))
-        print("Digraph must be two printable ASCII characters.")
-        valid = false
-      end
-
-      if type(def.name) ~= "string" or vim.fn.strchars(def.name) < 1 then
-        print("Error: Invalid name in digraph definition at index " .. i .. ":")
-        print(table_to_string(def))
-        print("Name must contain at least one character.")
-        valid = false
-      end
-    end
+  local function print_error(index, error_message, def)
+    vim.notify(
+      "Error: Invalid digraph definition at index " .. index .. ": " .. error_message .. ": " .. table_to_string(def),
+      vim.log.levels.ERROR)
   end
 
+  for i, def in ipairs(digraph) do
+    if type(def) ~= "table" then
+      vim.notify("Error: Digraph definition at index " .. i .. " is not a table.", vim.log.levels.ERROR)
+      valid = false
+      goto continue
+    end
+    if type(def.symbol) ~= "string" or vim.fn.strchars(def.symbol) ~= 1 then
+      print_error(i, "Symbol must be a single character", def)
+      valid = false
+      goto continue
+    end
+    if type(def.digraph) ~= "string" or vim.fn.strchars(def.digraph) ~= 2 or not def.digraph:match("^%C%C$") then
+      print_error(i, "Digraph must be two printable characters", def)
+      valid = false
+      goto continue
+    end
+    if type(def.name) ~= "string" or vim.fn.strchars(def.name) < 1 then
+      print_error(i, "Name must contain at least one character", def)
+      valid = false
+      goto continue
+    end
+    ::continue::
+  end
   return valid
 end
 
@@ -107,6 +112,7 @@ function M.setup(opts)
   if opts.digraphs then
     M.merge_digraphs(opts.digraphs, config.digraphs)
   end
+  M.validate_digraphs(config.digraphs)
 end
 
 -- Custom column layout for Telescope display

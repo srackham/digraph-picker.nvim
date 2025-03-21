@@ -38,7 +38,7 @@ local digraphs = {
   { digraph = 'AE', symbol = '≈', name = 'APPROXIMATELY EQUAL' },
   { digraph = 'LE', symbol = '≤', name = 'LESS THAN OR EQUAL' },
   { digraph = 'GE', symbol = '≥', name = 'GREATER THAN OR EQUAL' },
-  { digraph = "PP", symbol = "¶", name = "PARAGRAPH SIGN" },
+  { digraph = "P", symbol = "¶", name = "PARAGRAPH SIGN" },
 }
 picker.setup({
   digraphs = digraphs
@@ -48,4 +48,4 @@ vim.keymap.set({ 'i', 'n' }, '<C-k><C-k>', function()
   picker.insert_digraph()
 end, { noremap = true, silent = true, desc = "List digraphs" })
 
-picker.validate_digraphs(digraphs)
+-- picker.validate_digraphs(digraphs)
