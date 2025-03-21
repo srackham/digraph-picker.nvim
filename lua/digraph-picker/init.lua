@@ -25,7 +25,7 @@ local config = {
 -- - The `digraph` and `name` fields are optional in source table definitions.
 -- - If the destination table contains a definition with the same `symbol` then non-nil definition `digraph` and `name` fields are assigned to the corresponding fields in the destination definition.
 -- - If the destination table does not contain a definition with the same `symbol` then the source definition is appended to destination table.
-local function merge_digraphs(src, dst)
+function M.merge_digraphs(src, dst)
   local dst_symbols = {}
   for i, def in ipairs(dst) do
     dst_symbols[def.symbol] = i
@@ -47,15 +47,65 @@ local function merge_digraphs(src, dst)
   return dst
 end
 
+function M.validate_digraphs(digraph)
+  if type(digraph) ~= "table" then
+    error("Input must be a table of digraph definitions.")
+  end
+
+  local valid = true
+
+  local function table_to_string(t)
+    local parts = {}
+    for k, v in pairs(t) do
+      if type(v) == "string" then
+        parts[#parts + 1] = k .. " = '" .. v .. "'"
+      else
+        parts[#parts + 1] = k .. " = " .. tostring(v)
+      end
+    end
+    return "{ " .. table.concat(parts, ", ") .. " }"
+  end
+
+  for i, def in ipairs(digraph) do
+    if type(def) ~= "table" then
+      print("Error: Digraph definition at index " .. i .. " is not a table.")
+      valid = false
+    else
+      if type(def.symbol) ~= "string" or vim.fn.strchars(def.symbol) ~= 1 then
+        print("Error: Invalid symbol in digraph definition at index " .. i .. ":")
+        print(table_to_string(def))
+        print("Symbol must be a single character.")
+        valid = false
+      end
+
+      if type(def.digraph) ~= "string" or vim.fn.strchars(def.digraph) ~= 2 or not def.digraph:match("^%C%C$") then
+        print("Error: Invalid digraph in digraph definition at index " .. i .. ":")
+        print(table_to_string(def))
+        print("Digraph must be two printable ASCII characters.")
+        valid = false
+      end
+
+      if type(def.name) ~= "string" or vim.fn.strchars(def.name) < 1 then
+        print("Error: Invalid name in digraph definition at index " .. i .. ":")
+        print(table_to_string(def))
+        print("Name must contain at least one character.")
+        valid = false
+      end
+    end
+  end
+
+  return valid
+end
+
 -- `setup` initialises and configures the plugin.
--- 
+--
 -- Options:
--- 
+--
 --   `digraphs`: A table of digraph definitions (see `merge_digraphs`).digraphs
--- 
+--
 function M.setup(opts)
   if opts.digraphs then
-    merge_digraphs(opts.digraphs, config.digraphs)
+    M.merge_digraphs(opts.digraphs, config.digraphs)
   end
 end
 
