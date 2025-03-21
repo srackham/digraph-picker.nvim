@@ -10,6 +10,55 @@ local config = {
   digraphs = require('digraph-picker.digraphs')
 }
 
+-- Merges a source digraphs table (`src`) into a destination (`dst`) digraphs table. The digraphs table contains a list of digraph definitions. Here's an example of a digraphs table:
+--
+-- ```lua
+-- {
+--   { digraph = 'SM', symbol = '☺', name = 'SMILING FACE' },
+--   { digraph = 'FR', symbol = '☹', name = 'FROWNING FACE' },
+--   { digraph = 'HT', symbol = '♥', name = 'HEART' },
+--   { digraph = 'ST', symbol = '★', name = 'STAR' },
+-- },
+-- ```
+-- The rules for merging a digraph definition into the destination table are:
+--
+-- - The `digraph` and `name` fields are optional in source table definitions.
+-- - If the destination table contains a definition with the same `symbol` then non-nil definition `digraph` and `name` fields are assigned to the corresponding fields in the destination definition.
+-- - If the destination table does not contain a definition with the same `symbol` then the source definition is appended to destination table.
+local function merge_digraphs(src, dst)
+  local dst_symbols = {}
+  for i, def in ipairs(dst) do
+    dst_symbols[def.symbol] = i
+  end
+  for _, src_def in ipairs(src) do
+    local dst_index = dst_symbols[src_def.symbol]
+    if dst_index then
+      local dst_def = dst[dst_index]
+      if src_def.digraph then
+        dst_def.digraph = src_def.digraph
+      end
+      if src_def.name then
+        dst_def.name = src_def.name
+      end
+    else
+      table.insert(dst, src_def)
+    end
+  end
+  return dst
+end
+
+-- `setup` initialises and configures the plugin.
+-- 
+-- Options:
+-- 
+--   `digraphs`: A table of digraph definitions (see `merge_digraphs`).digraphs
+-- 
+function M.setup(opts)
+  if opts.digraphs then
+    merge_digraphs(opts.digraphs, config.digraphs)
+  end
+end
+
 -- Custom column layout for Telescope display
 local function make_display(entry)
   local displayer = entry_display.create({
@@ -25,11 +74,6 @@ local function make_display(entry)
     { entry.value.digraph, 'TelescopeResultsNumber' },
     entry.value.name,
   })
-end
-
--- Setup function to configure plugin
-function M.setup(opts)
-  -- config.digraphs = opts.digraphs or {}
 end
 
 local function debug(val)
@@ -59,15 +103,12 @@ local function insert_text(text, mode)
   vim.api.nvim_win_set_cursor(0, { row, new_col })
   if mode == 'i' then
     sendkeys('<Esc>a') -- Move one character to the right and reenter insert-mode
-  else
-    sendkeys('<Esc>')
   end
 end
 
--- `insert_digraph` opens a Telescope digraph picker and inserts the selected digraph character in to the current window.
+-- `insert_digraph` opens a Telescope digraph picker and inserts the selected digraph character into the current window.
 -- Normally called when the current window is in insert mode.
 function M.insert_digraph(opts)
-  debug(vim.api.nvim_get_mode().mode)
   opts = opts or {}
   local mode = vim.api.nvim_get_mode().mode -- Mode of window being inserted into
   pickers.new({}, {

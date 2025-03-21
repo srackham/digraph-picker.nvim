@@ -43,8 +43,6 @@ picker.setup({
   },
 })
 
--- picker.insert_digraph()
-
 vim.keymap.set({ 'i', 'n' }, '<C-k><C-k>', function()
   picker.insert_digraph()
 end, { noremap = true, silent = true, desc = "List digraphs" })
