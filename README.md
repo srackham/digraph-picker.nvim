@@ -16,6 +16,26 @@ A Neovim Telescope extension plugin for browsing and inserting digraphs.
         vim.keymap.set('i', '<C-k><C-k>', require('digraph-picker').insert_digraph,
             { noremap = true, silent = true, desc = "Digraph picker" })
 
+### LazyVim Installation
+If you use the [LazyVim](https://www.lazyvim.org/) package manager:
+
+1. Create a Lua file (e.g. `digraph-picker.lua`) in the plugins configuration directory (normally `~/.config/nvim/lua/plugins/` on Linux)  and add the following text:
+   ```lua
+   return {
+     'srackham/digraph-picker.nvim',
+     dependencies = {
+       'nvim-telescope/telescope.nvim',
+     },
+     config = function()
+       local picker = require('digraph-picker')
+       picker.setup()
+       vim.keymap.set('i', '<C-k><C-k>', picker.insert_digraph,
+         { noremap = true, silent = true, desc = "Digraph picker" })
+     end,
+   }
+   ```
+2. Restart Neovim.
+
 ## Implementation
 
 - The builtin digraph definitions were scraped from the Vim help file (see `:h digraph.txt` command).
@@ -23,6 +43,7 @@ A Neovim Telescope extension plugin for browsing and inserting digraphs.
 ## Todo
 
 - Expand the installation notes.
+- Add a _Usage_ section.
 - Document digraph addition, deletion and modification.
 - Document API in this README.
 - Add API documentation in the form of a Vim help file.
