@@ -1,44 +1,28 @@
 # Digraph Picker
 
-A Neovim Telescope extension for browsing and inserting digraphs.
+A Neovim Telescope extension plugin for browsing and inserting digraphs.
 
-Inspired by [protex/better-digraphs.nvim: Better digraphs plugin](https://github.com/protex/better-digraphs.nvim).
+![Screenshot](screenshot-1.png)
+
+## Installation
+
+- Install from the Github [srackham/digraph-picker.nvim](https://github.com/srackham/digraph-picker.nvim) repo using your preferred Neovim plugin installer.
+- Call the module `setup` function from you plugin configuration e.g.
+
+        require('digraph-picker').setup()
+
+- Create an insert-mode keyboard mapping to invoke the digraph picker e.g.
+
+        vim.keymap.set('i', '<C-k><C-k>', require('digraph-picker').insert_digraph,
+            { noremap = true, silent = true, desc = "Digraph picker" })
 
 ## Implementation
 
-### setup function
-Options:
+- The builtin digraph definitions were scraped from the Vim help file (see `:h digraphs.txt` command).
 
-    digraphs = { <additional digraph definitions>... }
-    exclude='<regexp>'  -- Exclude builtin digraphs matching the regular expression ('.*' or '..' excludes all builtin digraphs).
+## Todo
 
-- The plugin's `setup` function has a `digraphs` option which is a Lua table containing digraph definitions, for example:
-
-  ```lua
-    {
-      { digraph = 'SM', symbol = '☺', name = 'SMILING FACE' },
-      { digraph = 'FR', symbol = '☹', name = 'FROWNING FACE' },
-      { digraph = 'HT', symbol = '♥', name = 'HEART' },
-      { digraph = 'ST', symbol = '★', name = 'STAR' },
-    }
-  ```
-
-### Perplexity Query
-This Perplexity Query was the starting point:
-
-Generate code for a neovim Telescope extension plugin that implements a Telescope picker to view a list of neovim digraphs which can then be selected and inserted into the current buffer. Here's the specification:
-
-- The Telescope picker layout column widths are 10% for `symbol` (column 1), 10% for `digraph` (column 2), 80% for `name` (column 3).
-- The plugin exposes a function called `insert_digraph` which allows the user to search digraph definition `name` and `digraph` fields
-- If the user selects a digraph then the digraph `symbol` is inserted into the neovim buffer.
-- Neovim is assumed to be executing in insert-mode when the `insert_digraph` function is executed.
-
-### Perplexity Response
-https://www.perplexity.ai/search/generate-code-for-a-neovim-tel-0xiAc6O1QTmtPuH7vEgz9g
-
-## Digraph Characters
-
-- For builtin symbols see `:h digraph.txt`
-- Only include single-character digraphs from `digraph.txt`
-- A collection of symbols: [nvim-telescope/telescope-symbols.nvim](https://github.com/nvim-telescope/telescope-symbols.nvim)
-
+- Expand the installation notes.
+- Document digraph addition, deletion and modification.
+- Document API in this README.
+- Add API documentation in the form of a Vim help file.
