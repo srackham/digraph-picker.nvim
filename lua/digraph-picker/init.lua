@@ -45,12 +45,12 @@ function M.merge_digraphs(src, dst)
   return dst
 end
 
--- `validate_digraphs(digraph)` validates the `digraph` table of digraph definitions (see `merge_digraphs`) and returns `true` if there are no validation errors. When an invalid digraph definition is found the user is notified with a printed error message. The validation rules are as follows:
+-- `validate_digraphs(digraphs)` validates the `digraphs` table of digraph definitions (see `merge_digraphs`) and returns `true` if there are no validation errors. When an invalid digraph definition is found the user is notified with a printed error message. The validation rules are as follows:
 --
 -- - the `symbol` field must be a single character.
 -- - the `digraph` field must be two printable characters.
 -- - the `name` field must contain at least one character.
-function M.validate_digraphs(digraph)
+function M.validate_digraphs(digraphs)
   local function table_to_string(t)
     local parts = {}
     for k, v in pairs(t) do
@@ -69,12 +69,12 @@ function M.validate_digraphs(digraph)
       vim.log.levels.ERROR)
   end
 
-  if type(digraph) ~= "table" then
-    error("Input must be a table of digraph definitions.")
+  if type(digraphs) ~= "table" then
+    error("`digraphs` must be a table of digraph definitions.")
     return false
   end
   local valid = true
-  for i, def in ipairs(digraph) do
+  for i, def in ipairs(digraphs) do
     if type(def) ~= "table" then
       vim.notify("Error: Digraph definition at index " .. i .. " is not a table.", vim.log.levels.ERROR)
       valid = false
