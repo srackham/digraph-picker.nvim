@@ -110,17 +110,11 @@ end
 function M.setup(opts)
   opts = opts or {}
   opts.digraphs = opts.digraphs or {}
-  if not M.validate_digraphs(opts.digraphs) then
-    return
-  end
   config.digraphs = {}
-  if not opts.exclude_builtin_digraphs then
-    config.digraphs = require('digraph-picker.digraphs')
-  end
+  M.merge_digraphs(opts.digraphs, config.digraphs)
   if not M.validate_digraphs(config.digraphs) then
     return
   end
-  M.merge_digraphs(opts.digraphs, config.digraphs)
 end
 
 -- Custom column layout for Telescope display
