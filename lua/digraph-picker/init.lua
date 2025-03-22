@@ -108,6 +108,7 @@ end
 --
 function M.setup(opts)
   opts = opts or {}
+  opts.digraphs = opts.digraphs or {}
   config.digraphs = {}
   if not opts.exclude_builtin_digraphs then
     config.digraphs = require('digraph-picker.digraphs')
