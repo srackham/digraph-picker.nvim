@@ -18,7 +18,7 @@ A Neovim Telescope extension plugin for browsing and inserting digraphs.
 
 ## Implementation
 
-- The builtin digraph definitions were scraped from the Vim help file (see `:h digraphs.txt` command).
+- The builtin digraph definitions were scraped from the Vim help file (see `:h digraph.txt` command).
 
 ## Todo
 
