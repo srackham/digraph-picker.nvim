@@ -71,6 +71,7 @@ function M.validate_digraphs(digraph)
 
   if type(digraph) ~= "table" then
     error("Input must be a table of digraph definitions.")
+    return false
   end
   local valid = true
   for i, def in ipairs(digraph) do
