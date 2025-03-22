@@ -20,7 +20,6 @@ local config = {}
 -- ```
 -- The rules for merging a digraph definition into the destination table are:
 --
--- - The `digraph` and `name` fields are optional in source table definitions.
 -- - If the destination table contains a definition with the same `symbol` then non-nil definition `digraph` and `name` fields are assigned to the corresponding fields in the destination definition.
 -- - If the destination table does not contain a definition with the same `symbol` then the source definition is appended to destination table.
 function M.merge_digraphs(src, dst)
@@ -42,7 +41,18 @@ function M.merge_digraphs(src, dst)
       table.insert(dst, src_def)
     end
   end
-  return dst
+end
+
+-- `update_vim_digraphs(from, with)` installs Vim digraphs with definitions (see `merge_digraphs`) and returns `true` if there are no validation errors. When an invalid digraph definition is found the user is notified with a printed error message. The validation rules are as follows:
+function M.update_vim_digraphs(from, with)
+  local with_indexes = {}
+  for i, def in ipairs(with) do
+    with_indexes[def.symbol] = i
+  end
+  for _, from_def in ipairs(from) do
+    local with_def = with[with_indexes[from_def.symbol]]
+    vim.fn.digraph_set(with_def.digraph, with_def.symbol)
+  end
 end
 
 -- `validate_digraphs(digraphs)` validates the `digraphs` table of digraph definitions (see `merge_digraphs`) and returns `true` if there are no validation errors. When an invalid digraph definition is found the user is notified with a printed error message. The validation rules are as follows:
@@ -115,6 +125,7 @@ function M.setup(opts)
   if not M.validate_digraphs(config.digraphs) then
     return
   end
+  M.update_digraphs(opts.digraphs, config.digraphs)
 end
 
 -- Custom column layout for Telescope display
