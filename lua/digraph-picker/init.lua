@@ -6,9 +6,7 @@ local entry_display = require('telescope.pickers.entry_display')
 local conf = require('telescope.config').values
 
 local M = {}
-local config = {
-  digraphs = require('digraph-picker.digraphs')
-}
+local config = {}
 
 -- Merges a source digraphs table (`src`) into a destination (`dst`) digraphs table. The digraphs table contains a list of digraph definitions. Here's an example of a digraphs table:
 --
@@ -53,11 +51,6 @@ end
 -- - the `digraph` field must be two printable characters.
 -- - the `name` field must contain at least one character.
 function M.validate_digraphs(digraph)
-  if type(digraph) ~= "table" then
-    error("Input must be a table of digraph definitions.")
-  end
-
-  local valid = true
   local function table_to_string(t)
     local parts = {}
     for k, v in pairs(t) do
@@ -76,6 +69,10 @@ function M.validate_digraphs(digraph)
       vim.log.levels.ERROR)
   end
 
+  if type(digraph) ~= "table" then
+    error("Input must be a table of digraph definitions.")
+  end
+  local valid = true
   for i, def in ipairs(digraph) do
     if type(def) ~= "table" then
       vim.notify("Error: Digraph definition at index " .. i .. " is not a table.", vim.log.levels.ERROR)
@@ -106,12 +103,16 @@ end
 --
 -- Options:
 --
---   `digraphs`: A table of digraph definitions (see `merge_digraphs`).digraphs
+--   `digraphs`: A table of digraph definitions (see `merge_digraphs`).
+--   `exclude_builtin_digraphs``: Setting this to `true` stops the builtin digraph table from loading.
 --
 function M.setup(opts)
-  if opts.digraphs then
-    M.merge_digraphs(opts.digraphs, config.digraphs)
+  opts = opts or {}
+  config.digraphs = {}
+  if not opts.exclude_builtin_digraphs then
+    config.digraphs = require('digraph-picker.digraphs')
   end
+  M.merge_digraphs(opts.digraphs, config.digraphs)
   M.validate_digraphs(config.digraphs)
 end
 
@@ -163,7 +164,7 @@ local function insert_text(text, mode)
 end
 
 -- `insert_digraph` opens a Telescope digraph picker and inserts the selected digraph character into the current window.
--- Normally called when the current window is in insert mode.
+-- This function is normally called in insert mode.
 function M.insert_digraph(opts)
   opts = opts or {}
   local mode = vim.api.nvim_get_mode().mode -- Mode of window being inserted into
