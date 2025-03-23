@@ -42,7 +42,7 @@ function M.merge_digraphs(src, dst)
   end
 end
 
--- `update_vim_digraphs(symbols, digraphs)` sets Vim digraphs with matching `symbols` from the `digraphs` table (see `merge_digraphs`).
+-- `update_vim_digraphs(symbols, digraphs)` sets Vim digraphs with matching `symbols` with values from the `digraphs` table (see `merge_digraphs`).
 function M.update_vim_digraphs(symbols, digraphs)
   local digraphs_index = {}
   for i, def in ipairs(digraphs) do
@@ -50,8 +50,7 @@ function M.update_vim_digraphs(symbols, digraphs)
   end
   for _, symbol in pairs(symbols) do
     local def = digraphs[digraphs_index[symbol]]
-    print("Set digraph: ", def.digraph, def.symbol)
-    -- vim.fn.digraph_set(def.digraph, def.symbol)
+    vim.fn.digraph_set(def.digraph, def.symbol)
   end
 end
 
@@ -125,9 +124,7 @@ end
 --
 --   `digraphs`: A table of digraph definitions (see `merge_digraphs`).
 --   `exclude_builtin_digraphs``: Setting this to `true` stops the builtin digraph table from loading.
---
 function M.setup(opts)
-  print("DEVELOPMENT MODE")
   opts = opts or {}
   opts.digraphs = opts.digraphs or {}
   M.digraphs = {}
@@ -197,7 +194,7 @@ function M.insert_digraph(opts)
   local mode = vim.api.nvim_get_mode().mode -- Mode of window being inserted into
   pickers.new({}, {
     prompt_title = "Insert Digraph",
-    finder = finders.new_table({
+    finder = finders.new_table {
       results = M.digraphs,
       entry_maker = function(entry)
         return {
@@ -206,14 +203,13 @@ function M.insert_digraph(opts)
           ordinal = entry.digraph .. ' ' .. entry.name,
         }
       end
-    }),
+    },
     sorter = conf.generic_sorter({}),
     attach_mappings = function(prompt_bufnr)
       actions.select_default:replace(function()
-        local selection = action_state.get_selected_entry()
         actions.close(prompt_bufnr)
+        local selection = action_state.get_selected_entry()
         if selection then
-          -- Insert symbol while maintaining insert mode
           local symbol = selection.value.symbol
           insert_text(symbol, mode)
         end
