@@ -6,7 +6,6 @@ local entry_display = require('telescope.pickers.entry_display')
 local conf = require('telescope.config').values
 
 local M = {}
-local config = {}
 
 -- Merges a source digraphs table (`src`) into a destination (`dst`) digraphs table. The digraphs table contains a list of digraph definitions. Here's an example of a digraphs table:
 --
@@ -43,15 +42,16 @@ function M.merge_digraphs(src, dst)
   end
 end
 
--- `update_vim_digraphs(from, with)` installs Vim digraphs with definitions (see `merge_digraphs`) and returns `true` if there are no validation errors. When an invalid digraph definition is found the user is notified with a printed error message. The validation rules are as follows:
-function M.update_vim_digraphs(from, with)
-  local with_indexes = {}
-  for i, def in ipairs(with) do
-    with_indexes[def.symbol] = i
+-- `update_vim_digraphs(symbols, digraphs)` sets Vim digraphs with matching `symbols` from the `digraphs` table (see `merge_digraphs`).
+function M.update_vim_digraphs(symbols, digraphs)
+  local digraphs_index = {}
+  for i, def in ipairs(digraphs) do
+    digraphs_index[def.symbol] = i
   end
-  for _, from_def in ipairs(from) do
-    local with_def = with[with_indexes[from_def.symbol]]
-    vim.fn.digraph_set(with_def.digraph, with_def.symbol)
+  for _, symbol in pairs(symbols) do
+    local def = digraphs[digraphs_index[symbol]]
+    print("Set digraph: ", def.digraph, def.symbol)
+    -- vim.fn.digraph_set(def.digraph, def.symbol)
   end
 end
 
@@ -110,6 +110,15 @@ function M.validate_digraphs(digraphs)
   return valid
 end
 
+-- `digraphs_deep_copy` returns a deep copy of the table of `digraphs` definitions.
+local function digraphs_deep_copy(digraphs)
+  local result = {}
+  for i, def in ipairs(digraphs) do
+    result[i] = { digraph = def.digraph, symbol = def.symbol, name = def.name }
+  end
+  return result
+end
+
 -- `setup` initialises and configures the plugin.
 --
 -- Options:
@@ -118,14 +127,20 @@ end
 --   `exclude_builtin_digraphs``: Setting this to `true` stops the builtin digraph table from loading.
 --
 function M.setup(opts)
+  print("DEVELOPMENT MODE")
   opts = opts or {}
   opts.digraphs = opts.digraphs or {}
-  config.digraphs = {}
-  M.merge_digraphs(opts.digraphs, config.digraphs)
-  if not M.validate_digraphs(config.digraphs) then
-    return
+  M.digraphs = {}
+  if not opts.exclude_builtin_digraphs then
+    M.digraphs = digraphs_deep_copy(require('digraph-picker.digraphs'))
   end
-  M.update_digraphs(opts.digraphs, config.digraphs)
+  M.merge_digraphs(opts.digraphs, M.digraphs)
+  M.validate_digraphs(M.digraphs)
+  local symbols = {}
+  for _, def in ipairs(opts.digraphs) do
+    table.insert(symbols, def.symbol)
+  end
+  M.update_vim_digraphs(symbols, M.digraphs)
 end
 
 -- Custom column layout for Telescope display
@@ -183,7 +198,7 @@ function M.insert_digraph(opts)
   pickers.new({}, {
     prompt_title = "Insert Digraph",
     finder = finders.new_table({
-      results = config.digraphs,
+      results = M.digraphs,
       entry_maker = function(entry)
         return {
           value = entry,
