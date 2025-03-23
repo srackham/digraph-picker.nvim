@@ -182,9 +182,6 @@ local function insert_text(text, mode)
   vim.api.nvim_buf_set_lines(buf, row - 1, row, false, { new_line })
   local new_col = col + #text
   vim.api.nvim_win_set_cursor(0, { row, new_col })
-  if mode == 'i' then
-    sendkeys('<Esc>a') -- Move one character to the right and reenter insert-mode
-  end
 end
 
 -- `insert_digraph` opens a Telescope digraph picker and inserts the selected digraph character into the current window.
@@ -207,20 +204,23 @@ function M.insert_digraph(opts)
     sorter = conf.generic_sorter({}),
     attach_mappings = function(prompt_bufnr, map)
       -- Assign callback actions
-      map({ 'i', 'n' }, '<Esc>', function() -- User cancelled with Esc key callback
+      map({ 'i', 'n' }, '<Esc>', function() -- User cancelled with Esc key
         actions.close(prompt_bufnr)
-        vim.notify("Picker cancelled", vim.log.levels.DEBUG)
+        debug("Picker cancelled")
         if mode == 'i' then
-          sendkeys('<Esc>a') -- Reenter insert mode
+          sendkeys('a') -- Reenter insert mode
         end
       end)
-      actions.select_default:replace(function() -- User made digraph selection callback
+      actions.select_default:replace(function() -- User made digraph selection
         actions.close(prompt_bufnr)
         local selection = action_state.get_selected_entry()
         if selection then
           local symbol = selection.value.symbol
-          vim.notify("Symbol selected: " .. symbol, vim.log.levels.DEBUG)
+          debug("Symbol selected: " .. symbol)
           insert_text(symbol, mode)
+          if mode == 'i' then
+            sendkeys('a') -- Reenter insert mode
+          end
         end
       end)
       return true
