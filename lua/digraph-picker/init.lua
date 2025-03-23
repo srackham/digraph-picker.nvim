@@ -205,12 +205,21 @@ function M.insert_digraph(opts)
       end
     },
     sorter = conf.generic_sorter({}),
-    attach_mappings = function(prompt_bufnr)
-      actions.select_default:replace(function()
+    attach_mappings = function(prompt_bufnr, map)
+      -- Assign callback actions
+      map({ 'i', 'n' }, '<Esc>', function() -- User cancelled with Esc key callback
+        actions.close(prompt_bufnr)
+        vim.notify("Picker cancelled", vim.log.levels.DEBUG)
+        if mode == 'i' then
+          sendkeys('<Esc>a') -- Reenter insert mode
+        end
+      end)
+      actions.select_default:replace(function() -- User made digraph selection callback
         actions.close(prompt_bufnr)
         local selection = action_state.get_selected_entry()
         if selection then
           local symbol = selection.value.symbol
+          vim.notify("Symbol selected: " .. symbol, vim.log.levels.DEBUG)
           insert_text(symbol, mode)
         end
       end)
