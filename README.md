@@ -39,6 +39,7 @@ If you use the [LazyVim](https://www.lazyvim.org/) package manager:
 ## Usage
 
 - The recommended `<C-k><C-k>` digraph picker insert-mode key mapping plays nicely with the native Vim `<C-k>{char1}{char2}` digraph command.
+- The convention of normal case for the names of custom digraphs makes it easy to distinguish them from Vim's built in digraphs.
 - Custom digraphs are added to Neovim's internal digraph table and can be entered with the native Vim `CTRL-K {char1} {char2}` commands.
 
 ## Implementation
@@ -52,4 +53,4 @@ If you use the [LazyVim](https://www.lazyvim.org/) package manager:
 - Document digraph addition, deletion and modification.
 - Document API in this README.
 - Add API documentation in the form of a Vim help file.
-- FIX: If the user cancels (e.g. presses Esc) when in insert mode then return to insert mode.
+- Write some tests.
