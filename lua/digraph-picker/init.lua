@@ -5,7 +5,17 @@ local pickers = require('telescope.pickers')
 local entry_display = require('telescope.pickers.entry_display')
 local conf = require('telescope.config').values
 
+-- `digraphs_deep_copy` returns a deep copy of the table of `digraphs` definitions.
+local function digraphs_deep_copy(digraphs)
+  local result = {}
+  for i, def in ipairs(digraphs) do
+    result[i] = { digraph = def.digraph, symbol = def.symbol, name = def.name }
+  end
+  return result
+end
+
 local M = {}
+M.digraphs = digraphs_deep_copy(require('digraph-picker.digraphs'))
 
 -- Merges a source digraphs table (`src`) into a destination (`dst`) digraphs table. The digraphs table contains a list of digraph definitions. Here's an example of a digraphs table:
 --
@@ -109,15 +119,6 @@ function M.validate_digraphs(digraphs)
   return valid
 end
 
--- `digraphs_deep_copy` returns a deep copy of the table of `digraphs` definitions.
-local function digraphs_deep_copy(digraphs)
-  local result = {}
-  for i, def in ipairs(digraphs) do
-    result[i] = { digraph = def.digraph, symbol = def.symbol, name = def.name }
-  end
-  return result
-end
-
 -- `setup` initialises and configures the plugin.
 --
 -- Options:
@@ -127,9 +128,8 @@ end
 function M.setup(opts)
   opts = opts or {}
   opts.digraphs = opts.digraphs or {}
-  M.digraphs = {}
-  if not opts.exclude_builtin_digraphs then
-    M.digraphs = digraphs_deep_copy(require('digraph-picker.digraphs'))
+  if opts.exclude_builtin_digraphs then
+    M.digraphs = {}
   end
   M.merge_digraphs(opts.digraphs, M.digraphs)
   M.validate_digraphs(M.digraphs)

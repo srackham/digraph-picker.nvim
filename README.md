@@ -7,10 +7,6 @@ A Neovim plugin for browsing and inserting digraphs. The plugin can be configure
 ## Installation
 
 - Download and install from the Github [srackham/digraph-picker.nvim](https://github.com/srackham/digraph-picker.nvim) repo using your preferred Neovim plugin installer.
-- Call the module `setup` function from your plugin configuration e.g.
-
-        require('digraph-picker').setup()
-
 - Create a keyboard mapping to invoke the digraph picker e.g.
 
         vim.keymap.set({ 'i', 'n' }, '<C-k><C-k>', require('digraph-picker').insert_digraph,
