@@ -56,59 +56,58 @@ function M.update_vim_digraphs(symbols, digraphs)
   end
 end
 
--- `validate_digraphs(digraphs)` validates the `digraphs` table of digraph definitions (see `merge_digraphs`) and returns `true` if there are no validation errors. When an invalid digraph definition is found the user is notified with a printed error message. The validation rules are as follows:
+local function table_to_string(t)
+  local parts = {}
+  for k, v in pairs(t) do
+    if type(v) == "string" then
+      parts[#parts + 1] = k .. " = '" .. v .. "'"
+    else
+      parts[#parts + 1] = k .. " = " .. tostring(v)
+    end
+  end
+  return "{ " .. table.concat(parts, ", ") .. " }"
+end
+
+-- `validate_digraphs(digraphs)` validates the `digraphs` table of digraph definitions (see `merge_digraphs`). Returns `nil` if there are no error or an error message string if there are validation errors. The digraph definition validation rules are as follows:
 --
 -- - the `symbol` field must be a single character.
 -- - the `digraph` field must be two printable characters.
 -- - the `name` field must contain at least one character.
 function M.validate_digraphs(digraphs)
-  local function table_to_string(t)
-    local parts = {}
-    for k, v in pairs(t) do
-      if type(v) == "string" then
-        parts[#parts + 1] = k .. " = '" .. v .. "'"
-      else
-        parts[#parts + 1] = k .. " = " .. tostring(v)
-      end
-    end
-    return "{ " .. table.concat(parts, ", ") .. " }"
-  end
-
-  local function print_error(index, error_message, def)
-    vim.notify(
-      "Error: Invalid digraph definition at index " .. index .. ": " .. error_message .. ": " .. table_to_string(def),
-      vim.log.levels.ERROR)
+  local function digraph_def_error(index, def, message)
+    return "invalid digraph definition at index " .. index .. ": " .. message .. ": " .. table_to_string(def)
   end
 
   if type(digraphs) ~= "table" then
-    error("`digraphs` must be a table of digraph definitions.")
-    return false
+    return "`digraphs` must be a table of digraph definitions"
   end
-  local valid = true
+  local err
+  err = ""
   for i, def in ipairs(digraphs) do
     if type(def) ~= "table" then
-      vim.notify("Error: Digraph definition at index " .. i .. " is not a table.", vim.log.levels.ERROR)
-      valid = false
+      err = err .. "\n" .. digraph_def_error(i, def, "digraph is not a table")
       goto continue
     end
     if type(def.symbol) ~= "string" or vim.fn.strchars(def.symbol) ~= 1 then
-      print_error(i, "Symbol must be a single character", def)
-      valid = false
+      err = err .. "\n" .. digraph_def_error(i, def, "symbol must be a single character")
       goto continue
     end
     if type(def.digraph) ~= "string" or vim.fn.strchars(def.digraph) ~= 2 or not def.digraph:match("^%C%C$") then
-      print_error(i, "Digraph must be two printable characters", def)
-      valid = false
+      err = err .. "\n" .. digraph_def_error(i, def, "digraph must be two printable characters")
       goto continue
     end
     if type(def.name) ~= "string" or vim.fn.strchars(def.name) < 1 then
-      print_error(i, "Name must contain at least one character", def)
-      valid = false
+      err = err .. "\n" .. digraph_def_error(i, def, "name must contain at least one character")
       goto continue
     end
     ::continue::
   end
-  return valid
+  if err == "" then
+    err = nil
+  else
+    err = err:sub(2)
+  end
+  return err
 end
 
 -- `setup` initialises and configures the plugin.
@@ -124,7 +123,11 @@ function M.setup(opts)
     M.digraphs = {}
   end
   M.merge_digraphs(opts.digraphs, M.digraphs)
-  M.validate_digraphs(M.digraphs)
+  local err = M.validate_digraphs(M.digraphs)
+  if err ~= nil then
+    vim.notify(err, vim.log.levels.ERROR)
+    return
+  end
   local symbols = {}
   for _, def in ipairs(opts.digraphs) do
     table.insert(symbols, def.symbol)
