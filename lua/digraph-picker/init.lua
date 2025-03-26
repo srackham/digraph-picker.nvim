@@ -5,17 +5,9 @@ local pickers = require('telescope.pickers')
 local entry_display = require('telescope.pickers.entry_display')
 local conf = require('telescope.config').values
 
--- `digraphs_deep_copy` returns a deep copy of the table of `digraphs` definitions.
-local function digraphs_deep_copy(digraphs)
-  local result = {}
-  for i, def in ipairs(digraphs) do
-    result[i] = { digraph = def.digraph, symbol = def.symbol, name = def.name }
-  end
-  return result
-end
-
+-- Module initialisation
 local M = {}
-M.digraphs = digraphs_deep_copy(require('digraph-picker.digraphs'))
+M.digraphs = require('digraph-picker.digraphs')
 
 -- Merges a source digraphs table (`src`) into a destination (`dst`) digraphs table. The digraphs table contains a list of digraph definitions. Here's an example of a digraphs table:
 --
