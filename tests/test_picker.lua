@@ -3,6 +3,7 @@
 --
 
 local M = require('digraph-picker')
+local tests_failed = false
 
 local function is_digraph_def_equal(def1, def2)
   return def2.symbol == def1.symbol and def2.digraph == def1.digraph and def2.name == def1.name
@@ -16,6 +17,7 @@ local function print_failed(expected, actual, message)
   print('❌ ' .. (message or 'Test failed'))
   print('  Expected: ' .. vim.inspect(expected))
   print('  Actual:   ' .. vim.inspect(actual))
+  tests_failed = true
 end
 
 local function assert_equal(expected, actual, message)
@@ -235,5 +237,13 @@ local function test_merge_digraphs()
   assert_digraphs_tables_equal(expected9, dst9, "merge_digraphs: nil digraph and name value")
 end
 
+-- Do the tests
 test_validate_digraphs()
 test_merge_digraphs()
+
+local exit_code = 0
+if tests_failed then
+  exit_code = 1
+  print('\n')
+end
+vim.api.nvim_command('cq ' .. exit_code)

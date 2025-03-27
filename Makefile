@@ -1,2 +1,2 @@
 test:
-	nvim --headless -c "luafile tests/test_picker.lua" -c "quit"
+	nvim --headless -c "luafile tests/test_picker.lua"
