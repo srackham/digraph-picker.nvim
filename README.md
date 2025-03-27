@@ -69,4 +69,3 @@ The builtin digraphs table can be completely excluded by setting the `exclude_bu
 
 - Document the API.
 - Add Vim help command documentation.
-- Write some tests.
