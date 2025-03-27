@@ -11,14 +11,13 @@ M.digraphs = require('digraph-picker.digraphs')
 
 -- Merges a source digraphs table (`src`) into a destination (`dst`) digraphs table. The digraphs table contains a list of digraph definitions. Here's an example of a digraphs table:
 --
--- ```lua
--- {
---   { digraph = 'SM', symbol = '☺', name = 'SMILING FACE' },
---   { digraph = 'FR', symbol = '☹', name = 'FROWNING FACE' },
---   { digraph = 'HT', symbol = '♥', name = 'HEART' },
---   { digraph = 'ST', symbol = '★', name = 'STAR' },
--- },
--- ```
+--    {
+--      { digraph = 'SM', symbol = '☺', name = 'SMILING FACE' },
+--      { digraph = 'FR', symbol = '☹', name = 'FROWNING FACE' },
+--      { digraph = 'HT', symbol = '♥', name = 'HEART' },
+--      { digraph = 'ST', symbol = '★', name = 'STAR' },
+--    },
+--
 -- The rules for merging a digraph definition into the destination table are:
 --
 -- - If the destination table contains a definition with the same `symbol` then non-nil definition `digraph` and `name` fields are assigned to the corresponding fields in the destination definition.
@@ -56,18 +55,6 @@ function M.update_vim_digraphs(symbols, digraphs)
   end
 end
 
-local function table_to_string(t)
-  local parts = {}
-  for k, v in pairs(t) do
-    if type(v) == "string" then
-      parts[#parts + 1] = k .. " = '" .. v .. "'"
-    else
-      parts[#parts + 1] = k .. " = " .. tostring(v)
-    end
-  end
-  return "{ " .. table.concat(parts, ", ") .. " }"
-end
-
 -- `validate_digraphs(digraphs)` validates the `digraphs` table of digraph definitions (see `merge_digraphs`). Returns `nil` if there are no error or an error message string if there are validation errors. The digraph definition validation rules are as follows:
 --
 -- - the `symbol` field must be a single character.
@@ -75,7 +62,7 @@ end
 -- - the `name` field must contain at least one character.
 function M.validate_digraphs(digraphs)
   local function digraph_def_error(index, def, message)
-    return "invalid digraph definition at index " .. index .. ": " .. message .. ": " .. table_to_string(def)
+    return "invalid digraph definition at index " .. index .. ": " .. message .. ": " .. vim.inspect(def)
   end
 
   if type(digraphs) ~= "table" then
@@ -110,12 +97,13 @@ function M.validate_digraphs(digraphs)
   return err
 end
 
--- `setup` initialises and configures the plugin.
+-- `setup` configures the plugin.
 --
 -- Options:
 --
 --   `digraphs`: A table of digraph definitions (see `merge_digraphs`).
 --   `exclude_builtin_digraphs``: Setting this to `true` stops the builtin digraph table from loading.
+--
 function M.setup(opts)
   opts = opts or {}
   opts.digraphs = opts.digraphs or {}
