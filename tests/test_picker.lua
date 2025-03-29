@@ -50,7 +50,7 @@ local function assert_digraph_defs_equal(expected, actual, message)
 end
 
 local function assert_digraphs_tables_equal(expected, actual, message)
-  if #expected ~= #actual then
+  if type(expected) ~= 'table' or type(actual) ~= 'table' or #expected ~= #actual then
     print_failed(expected, actual, message)
     return
   end
