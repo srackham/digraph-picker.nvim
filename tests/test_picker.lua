@@ -9,14 +9,19 @@ local function is_digraph_def_equal(def1, def2)
   return def2.symbol == def1.symbol and def2.digraph == def1.digraph and def2.name == def1.name
 end
 
+-- ANSI escape codes
+local green = '\027[32m' -- Start green text
+local red = '\027[31m'
+local reset = '\027[0m'  -- Reset all attributes (color, etc.)
+
 local function print_passed(message)
-  print('✔ ' .. (message or 'Test passed'))
+  io.write(green .. '✔ ' .. reset .. (message or 'Test passed') .. '\n')
 end
 
 local function print_failed(expected, actual, message)
-  print('❌ ' .. (message or 'Test failed'))
-  print('  Expected: ' .. vim.inspect(expected))
-  print('  Actual:   ' .. vim.inspect(actual))
+  io.write(red .. '✘ ' .. reset .. (message or 'Test failed') .. '\n')
+  io.write('  Expected: ' .. vim.inspect(expected) .. '\n')
+  io.write('  Actual:   ' .. vim.inspect(actual) .. '\n')
   tests_failed = true
 end
 
