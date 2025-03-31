@@ -51,7 +51,7 @@ The rules for merging digraph definitions into the builtin digraph table are:
 - If the builtin digraph table contains a definition with the same `symbol` then non-nil `digraph` and `name` fields are updated in the builtin definition.
 - If the builtin table does not contain a definition matching `symbol` then the new definition is added to the builtin table.
 
-Custom digraphs added with the `setup` function are also added to the Neovim internal digraph table and can be entered with the native Vim `CTRL-K {char1} {char2}` commands.
+Custom digraphs added with the `setup` function are also added to the Neovim internal digraph table and can be entered with the native Vim `CTRL-K {char1} {char2}` command.
 
 The builtin digraphs table can be completely excluded by setting the `exclude_builtin_digraphs` setup option to `true`.
 
