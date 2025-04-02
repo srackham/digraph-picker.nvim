@@ -22,6 +22,7 @@ If you use the [LazyVim](https://www.lazyvim.org/) package manager:
      dependencies = {
        'nvim-telescope/telescope.nvim',
      },
+     version = '*', -- Install latest tagged version
      config = function()
        local picker = require('digraph-picker')
        picker.setup()
