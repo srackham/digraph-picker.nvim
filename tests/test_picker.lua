@@ -18,18 +18,31 @@ local function print_passed(message)
   io.write(green .. '✔ ' .. reset .. (message or 'Test passed') .. '\n')
 end
 
-local function print_failed(expected, actual, message)
+local function print_failed(message)
+  io.write(red .. '✘ ' .. reset .. (message or 'Test failed') .. '\n')
+  tests_failed = true
+end
+
+local function print_failed_equal(expected, actual, message)
   io.write(red .. '✘ ' .. reset .. (message or 'Test failed') .. '\n')
   io.write('  Expected: ' .. vim.inspect(expected) .. '\n')
   io.write('  Actual:   ' .. vim.inspect(actual) .. '\n')
   tests_failed = true
 end
 
+local function assert(ok, message)
+  if ok then
+    print_passed(message)
+  else
+    print_failed(message)
+  end
+end
+
 local function assert_equal(expected, actual, message)
   if expected == actual then
     print_passed(message)
   else
-    print_failed(expected, actual, message)
+    print_failed_equal(expected, actual, message)
   end
 end
 
@@ -37,27 +50,18 @@ local function assert_starts_with(expected, actual, message)
   if string.sub(actual, 1, string.len(expected)) == expected then
     print_passed(message)
   else
-    print_failed(expected, actual, message)
-  end
-end
-
-local function assert_digraph_defs_equal(expected, actual, message)
-  if is_digraph_def_equal(expected, actual) then
-    print_passed(message)
-  else
-    print_failed(expected, actual, message)
+    print_failed_equal(expected, actual, message)
   end
 end
 
 local function assert_digraphs_tables_equal(expected, actual, message)
   if type(expected) ~= 'table' or type(actual) ~= 'table' or #expected ~= #actual then
-    print_failed(expected, actual, message)
+    print_failed_equal(expected, actual, message)
     return
   end
-  local is_equal = true
   for i, _ in ipairs(expected) do
     if not is_digraph_def_equal(expected[i], actual[i]) then
-      print_failed(expected, actual, (message or "Test failed") .. ": at index " .. i)
+      print_failed_equal(expected, actual, (message or "Test failed") .. ": at index " .. i)
       return
     end
   end
@@ -111,6 +115,7 @@ local function test_validate_digraphs()
     { digraph = '12', symbol = 'a', name = 'valid' },
   }
   local result = M.validate_digraphs(invalid_digraphs_6)
+  assert(result ~= nil, "validate_digraphs: must be invalid")
   assert_equal('invalid digraph definition at index 3: name must contain at least one character:',
     result:match('invalid digraph definition at index 3: name must contain at least one character:'),
     "validate_digraphs: multiple errors")
